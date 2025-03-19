@@ -25,3 +25,6 @@ class FrontEnd(ctk.CTk):
 
 
 FrontEnd(1200, 700)
+
+# ich schwöre ich habe alles selbst geschrieben, auch wenn die Repo bis gestern nicht auf github war...hab da was falsch
+# gemacht ^^'
