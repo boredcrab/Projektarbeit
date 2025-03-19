@@ -11,20 +11,11 @@ class FrontEnd(ctk.CTk):
         self.geometry(f"{self.width}x{self.height}")
         self.minsize(600, 400)
         self.my_button = ctk.CTkButton(self, text ="+", fg_color='#d6d6d6', text_color='#000000', width=self.width*0.06, height=self.height*0.07, font=("Cairo", 30))
-
+        self.my_button.place(width=self.width * 0.06, height=self.height * 0.07)
         self.frame = ctk.CTkScrollableFrame(self, width=self.width*0.83, height=self.height*0.68)
-
+        self.frame.place(x=self.width * 0.11, y=self.height * 0.14)
         self.mainloop()
 
-    def update_layout(self):
-        self.my_button.place(width = self.width * 0.06, height= self.height * 0.07)
-        self.my_button.place(x=self.width * 0.91, y=self.height * 0.8929)
-
-        self.frame.configure(width = self.width * 0.83, height = self.height * 0.68)
-        self.frame.place(x=self.width*0.11, y=self.height * 0.14)
 
 
 FrontEnd(1200, 700)
-
-# ich schwöre ich habe alles selbst geschrieben, auch wenn die Repo bis gestern nicht auf github war...hab da was falsch
-# gemacht ^^'
