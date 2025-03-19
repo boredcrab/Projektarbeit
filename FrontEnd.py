@@ -35,7 +35,7 @@ class FrontEnd(ctk.CTk):
 
     def unpack_values(self, dictionary, key):
         """Gibt eine Liste der Attribute für ein Haus aus. Der key ist immer die HausID.
-        values[0] i -> Name, values[1] -> HausID. Weiteres in der Doku."""
+        values[0] i -> Name, values[8] -> HausID. Weiteres in der Doku."""
         values = []
         dic = str(dictionary[key]).split(", ")                      # check if it really is separated by comma
         for i in dic:

@@ -13,12 +13,11 @@ Fast jede Funktion ist kurz erklärt. Weitere Informationen können hier gefunde
 Die Zahl **i** in value[ i ] gibt an, welche der folgenden Attribute genommen wird:
 
 0 - Name der Immobilie\
-1 - HausID\
-2 - Bild (im BLOB-Format)\
-3 - Ankaufspreis in **€**\
-4 - Verkaufspreis in **€**\
-5 - Maklerprovision in **%**\
-6 - Raumanzahl\
-7 - Wohnfläche in **m²**\
-8 - Grundstücksfläche in **m²**
-
+1 - Bild (im BLOB-Format)\
+2 - Ankaufspreis in **€**\
+3 - Verkaufspreis in **€**\
+4 - Maklerprovision in **%**\
+5 - Raumanzahl\
+6 - Wohnfläche in **m²**\
+7 - Grundstücksfläche in **m²**\
+8 - HausID
