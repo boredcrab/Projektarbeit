@@ -37,16 +37,14 @@ class DatabaseManager:
     # read ALL data from table
     def read_all(self):
         houses = []
-        h_attributes = []
+        attributes_list = []
         self.cursor.execute("SELECT * FROM Haus")
         data = self.cursor.fetchall()
-        i = 0
         for row in data:
             r = str(row)
-            h_attributes = r.split(", ")
-            houses.append(h_attributes[i])                                  # adds the current row, starting with [0]
-            i += 1
-        return houses, h_attributes
+            attributes_list.append(r)                                          # adds the current row, starting with [0]
+            houses.append(r.split(", ")[1])                             # [1] is always the house id
+        return houses, attributes_list
 
 
     # read SPECIFIC data from table
