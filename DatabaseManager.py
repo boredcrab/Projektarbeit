@@ -34,24 +34,12 @@ class DatabaseManager:
         command = f"INSERT INTO {table} VALUES {", ".join(attributes)}"
         self.cursor.execute(command, tuple(data.values()))
 
-    # read ALL data from table
-    def read_all(self):
-        houses = []
-        attributes_list = []
-        self.cursor.execute("SELECT * FROM Haus")
-        data = self.cursor.fetchall()
-        for row in data:
-            r = str(row)
-            attributes_list.append(r)                                          # adds the current row, starting with [0]
-            houses.append(r.split(", ")[1])                             # [1] is always the house id
-        return houses, attributes_list
-
-
     # read SPECIFIC data from table
-    def read(self, house_id):
-        select = f"SELECT * FROM Haus WHERE HausID=%s"
-        self.cursor.execute(select, (house_id,))
-        return self.cursor.fetchall()
+    def read_all(self):
+        select = "SELECT * FROM Haus"
+        self.cursor.execute(select)
+        data = self.cursor.fetchall()
+        return data
 
     # CHANGE data in table
     def change(self, house_id, Hausname=None, Bild=None, PreisAn=None, PreisVer=None, Provision=None, Raumanzahl=None,
@@ -68,7 +56,7 @@ class DatabaseManager:
 
         attributes = []
         for key in updates.keys():
-            if key == "Hausname" or key == "Bild":                                                    # gibt kein %BLOB
+            if key == "Hausname" or key == "Bild":                                  # !! LONG BLOB!!
                 attributes.append(f"{key} = %s")
             else:
                 attributes.append(f"{key} = %f")
