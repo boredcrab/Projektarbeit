@@ -23,20 +23,20 @@ class FrontEnd(ctk.CTk):
         data = self.dbman.read_all()
         for row in data:
             raw = str(row).split(", ")
-            newframe = ctk.CTkFrame(self.scrollable_frame)
+            newframe = ctk.CTkFrame(self.scrollable_frame, width=800, height=500)
             ctk.CTkLabel(newframe, text=raw[0])  # house name
             img_data = row[1]
             img_stream = io.BytesIO(img_data)
             pil_img = Image.open(img_stream)
             img = ctk.CTkImage(pil_img, size=(200, 150))
-            ctk.CTkLabel(newframe, image=img, text="").pack()
+            ctk.CTkLabel(newframe, image=img, text="").pack(side="left")
             ctk.CTkLabel(newframe, text=f"Ankaufspreis: {raw[2]} €").pack()
             ctk.CTkLabel(newframe, text=f"Verkaufspreis: {raw[3]} €").pack()
             ctk.CTkLabel(newframe, text=f"Provision: {raw[4]} %").pack()
             ctk.CTkLabel(newframe, text=f"Räume: {raw[5]}").pack()
             ctk.CTkLabel(newframe, text=f"Wohnfläche: {raw[6]} m²").pack()
             ctk.CTkLabel(newframe, text=f"Grundstücksfläche: {raw[7]} m²").pack()
-            newframe.pack(pady=10, padx=100)
+            newframe.pack(pady=100, padx=100, fill="x")
         self.mainloop()
 
 
