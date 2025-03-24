@@ -20,9 +20,9 @@ class Programm(ctk.CTk):
         self.geometry(f"{self.width}x{self.height}")
         self.minsize(1200, 700)
         self.maxsize(1200, 700)
-        self.my_button = ctk.CTkButton(self, text="+", fg_color='#d6d6d6', text_color='#000000',
-                                       width=self.width * 0.06, height=self.height * 0.07, font=("Cairo", 30))
-        self.my_button.place(x=self.width * 0.91, y=self.height * 0.8929)
+        self.add_button = ctk.CTkButton(self, text="+", fg_color='#d6d6d6', text_color='#000000',
+                                        width=self.width * 0.06, height=self.height * 0.07, font=("Cairo", 30), command=self.on_plusbutton_click)
+        self.add_button.place(x=self.width * 0.91, y=self.height * 0.8929)
         self.scrollable_frame = ctk.CTkScrollableFrame(self, width=self.width * 0.83, height=self.height * 0.68, fg_color="transparent")
         self.scrollable_frame.place(x=self.width * 0.11, y=self.height * 0.14)
         data = self.dbman.read_all()
@@ -64,5 +64,15 @@ class Programm(ctk.CTk):
 
         self.mainloop()
 
+    def on_plusbutton_click(self):
+        addframe = ctk.CTkFrame(self, width=self.width * 0.80, height=self.height * 0.7, fg_color="#ffffff", border_color="#dfdfdf", border_width=5)
+        addframe.place(x=self.width * 0.13, y=self.height * 0.14)
+        self.add_button.configure(fg_color="#dedede", text_color="#c6c6c6")
+        save_button = ctk.CTkButton(addframe, text="Speichern", fg_color='#d6d6d6', text_color='#000000',
+                                        width=self.width * 0.09, height=self.height * 0.05, font=("Cairo", 16, "bold"))
+        save_button.place(x = 830, y = 40)
+        cancel_button = ctk.CTkButton(addframe, text="ABBRECHEN", fg_color='#db3737', text_color='#ffffff',
+                                    width=self.width * 0.09, height=self.height * 0.05, font=("Cairo", 14, "bold"))
+        cancel_button.place(x=830, y=90)
 
 Programm(1200, 700)
