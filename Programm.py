@@ -12,13 +12,28 @@ def format_number(number):
 class Programm(ctk.CTk):
     def __init__(self, width, height):
         super().__init__()
+        # Parameters
         self.dbman = DatabaseManager()
         self.width = width
         self.height = height
         ctk.set_appearance_mode("light")
         self.title("Inventar-Editor")
         self.geometry(f"{self.width}x{self.height}")
+
+        # Values for insertion
         self.addframe = None
+        self.name = None
+        self.bprice = None
+        self.sprice = None
+        self.ins_image = None
+        self.rooms = None
+        self.larea = None
+        self.garea = None
+        self.provision = None
+        self.desc = None
+        self.floatvalues = [self.bprice, self.sprice, self.provision]
+        self.intvalues = [self.rooms, self.larea, self.garea]
+
         self.minsize(1200, 700)
         self.maxsize(1200, 700)
         self.add_button = ctk.CTkButton(self, text="+", fg_color='#d6d6d6', text_color='#000000',
@@ -78,29 +93,36 @@ class Programm(ctk.CTk):
             import_button.place(x=65, y=240)
             # Property Name Input
             name_entry = ctk.CTkEntry(self.addframe, width=320, height=50, placeholder_text="Immobilienname", corner_radius=4, border_width=1)
+            self.name = name_entry.get()
             name_entry.place(x=350, y=30)
 
             # Price Inputs
             ctk.CTkLabel(self.addframe, text="Ankaufspreis:", font=("Cairo", 14), corner_radius=4).place(x=350, y=120)
             purchase_price = ctk.CTkEntry(self.addframe, width=150, height=30, placeholder_text="Preis", border_width=1, corner_radius=4)
+            self.bprice = purchase_price.get()
             purchase_price.place(x=450, y=120)
             ctk.CTkLabel(self.addframe, text="€", font=("Cairo", 16), corner_radius=4).place(x=600, y=120)
             ctk.CTkLabel(self.addframe, text="Verkaufspreis:", font=("Cairo", 14), corner_radius=4).place(x=350, y=160)
             sell_price = ctk.CTkEntry(self.addframe, width=150, height=30, placeholder_text="Preis", border_width=1, corner_radius=4)
+            self.sprice = sell_price.get()
             sell_price.place(x=450, y=160)
             ctk.CTkLabel(self.addframe, text="€", font=("Cairo", 16), corner_radius=4).place(x=600, y=160)
 
             ctk.CTkLabel(self.addframe, text="Anzahl Zimmer:", font=("Cairo", 14, "bold"), corner_radius=4).place(x=20, y=300)
             room_count = ctk.CTkEntry(self.addframe, width=100, height=30, placeholder_text="Anzahl", border_width=1, corner_radius=4)
+            self.rooms = room_count.get()
             room_count.place(x=220, y=300)
             ctk.CTkLabel(self.addframe, text="Wohnfläche in m²:", font=("Cairo", 14, "bold"), corner_radius=4).place(x=20, y=340)
             area = ctk.CTkEntry(self.addframe, width=100, height=30, placeholder_text="Fläche", border_width=1, corner_radius=4)
+            self.larea = area.get()
             area.place(x=220, y=340)
             ctk.CTkLabel(self.addframe, text="Grundstücksfläche in m²:", font=("Cairo", 14, "bold"), corner_radius=4).place(x=20, y=380)
             total_area = ctk.CTkEntry(self.addframe, width=100, height=30, placeholder_text="Fläche", border_width=1, corner_radius=4)
+            self.garea = area.get()
             total_area.place(x=220, y=380)
             ctk.CTkLabel(self.addframe, text="Maklerprovision in %:", font=("Cairo", 14, "bold"), corner_radius=4).place(x=20, y=420)
             commission = ctk.CTkEntry(self.addframe, width=100, height=30, placeholder_text="Prozent", border_width=1, corner_radius=4)
+            self.provision = commission.get()
             commission.place(x=220, y=420)
 
             description = ctk.CTkTextbox(self.addframe, width=500, height=200, corner_radius=4)
@@ -118,6 +140,22 @@ class Programm(ctk.CTk):
             self.addframe.destroy()
 
     def save_changes(self):
+        self.prepare_data()
+        for i, j in self.intvalues, self.floatvalues:
+            if isinstance(i, int) and isinstance(j, float):
+                continue
+            elif not (isinstance(i, int) and isinstance(j, float)):
+                return f"Bitte {i} als Ganzzahl und {j} als Zahl angeben! Sonderzeichen werden nicht angenommen."
+            elif not isinstance(i, int):
+                return f"Bitte {i} als Ganzzahl angeben! Sonderzeichen werden nicht angenommen."
+            elif not isinstance(j, float):
+                return f"Bitte {j} als Zahl angeben! Sonderzeichen werden nicht angenommen."
+        self.dbman.insert(self.name, self.ins_image, self.bprice, self.sprice, self.provision, self.rooms, self.larea, self.garea)
         self.addframe.pack_forget()
+
+    def prepare_data(self):
+        self.bprice = str(self.bprice).strip(" .").replace(",", ".")
+        self.sprice = str(self.sprice).strip(" .").replace(",", ".")
+        self.provision = str(self.provision).replace(",", ".")
 
 Programm(1200, 700)

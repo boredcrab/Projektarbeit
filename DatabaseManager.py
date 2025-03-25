@@ -14,7 +14,7 @@ class DatabaseManager:
         self.connection.close()
 
     # insert data into table
-    def insert(self, house_id, Hausname=None, Bild=None, PreisAn=None, PreisVer=None, Provision=None, Raumanzahl=None,
+    def insert(self, Hausname=None, Bild=None, PreisAn=None, PreisVer=None, Provision=None, Raumanzahl=None,
            Wohnflaeche=None, Grundstuecksflaeche=None):
         data = self.sanitize_input(Hausname=Hausname, Bild=Bild, PreisAn=PreisAn, PreisVer=PreisVer,
                                       Provision=Provision, Raumanzahl=Raumanzahl,
