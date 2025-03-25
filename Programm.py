@@ -18,6 +18,7 @@ class Programm(ctk.CTk):
         ctk.set_appearance_mode("light")
         self.title("Inventar-Editor")
         self.geometry(f"{self.width}x{self.height}")
+        self.addframe = None
         self.minsize(1200, 700)
         self.maxsize(1200, 700)
         self.add_button = ctk.CTkButton(self, text="+", fg_color='#d6d6d6', text_color='#000000',
@@ -65,14 +66,58 @@ class Programm(ctk.CTk):
         self.mainloop()
 
     def on_plusbutton_click(self):
-        addframe = ctk.CTkFrame(self, width=self.width * 0.80, height=self.height * 0.7, fg_color="#ffffff", border_color="#dfdfdf", border_width=5)
-        addframe.place(x=self.width * 0.13, y=self.height * 0.14)
-        self.add_button.configure(fg_color="#dedede", text_color="#c6c6c6")
-        save_button = ctk.CTkButton(addframe, text="Speichern", fg_color='#d6d6d6', text_color='#000000',
-                                        width=self.width * 0.09, height=self.height * 0.05, font=("Cairo", 16, "bold"))
-        save_button.place(x = 830, y = 40)
-        cancel_button = ctk.CTkButton(addframe, text="ABBRECHEN", fg_color='#db3737', text_color='#ffffff',
-                                    width=self.width * 0.09, height=self.height * 0.05, font=("Cairo", 14, "bold"))
-        cancel_button.place(x=830, y=90)
+        if self.addframe is None or not self.addframe.winfo_exists():
+            self.addframe = ctk.CTkFrame(self, width=self.width * 0.80, height=self.height * 0.7,
+                                         fg_color="#ffffff", border_color="#1E90FF", border_width=1, corner_radius=4)
+            self.addframe.place(x=self.width * 0.13, y=self.height * 0.14)
+
+            image_placeholder = ctk.CTkFrame(self.addframe, width=300, height=210, fg_color="#e0e0e0", corner_radius=4)
+            image_placeholder.place(x=20, y=20)
+            import_button = ctk.CTkButton(self.addframe, text="Importieren (JPG)", width=200, height=30,
+                                          fg_color="#d6d6d6", text_color="#000000", corner_radius=4)
+            import_button.place(x=65, y=240)
+            # Property Name Input
+            name_entry = ctk.CTkEntry(self.addframe, width=320, height=50, placeholder_text="Immobilienname", corner_radius=4, border_width=1)
+            name_entry.place(x=350, y=30)
+
+            # Price Inputs
+            ctk.CTkLabel(self.addframe, text="Ankaufspreis:", font=("Cairo", 14), corner_radius=4).place(x=350, y=120)
+            purchase_price = ctk.CTkEntry(self.addframe, width=150, height=30, placeholder_text="Preis", border_width=1, corner_radius=4)
+            purchase_price.place(x=450, y=120)
+            ctk.CTkLabel(self.addframe, text="€", font=("Cairo", 16), corner_radius=4).place(x=600, y=120)
+            ctk.CTkLabel(self.addframe, text="Verkaufspreis:", font=("Cairo", 14), corner_radius=4).place(x=350, y=160)
+            sell_price = ctk.CTkEntry(self.addframe, width=150, height=30, placeholder_text="Preis", border_width=1, corner_radius=4)
+            sell_price.place(x=450, y=160)
+            ctk.CTkLabel(self.addframe, text="€", font=("Cairo", 16), corner_radius=4).place(x=600, y=160)
+
+            ctk.CTkLabel(self.addframe, text="Anzahl Zimmer:", font=("Cairo", 14, "bold"), corner_radius=4).place(x=20, y=300)
+            room_count = ctk.CTkEntry(self.addframe, width=100, height=30, placeholder_text="Anzahl", border_width=1, corner_radius=4)
+            room_count.place(x=220, y=300)
+            ctk.CTkLabel(self.addframe, text="Wohnfläche in m²:", font=("Cairo", 14, "bold"), corner_radius=4).place(x=20, y=340)
+            area = ctk.CTkEntry(self.addframe, width=100, height=30, placeholder_text="Fläche", border_width=1, corner_radius=4)
+            area.place(x=220, y=340)
+            ctk.CTkLabel(self.addframe, text="Grundstücksfläche in m²:", font=("Cairo", 14, "bold"), corner_radius=4).place(x=20, y=380)
+            total_area = ctk.CTkEntry(self.addframe, width=100, height=30, placeholder_text="Fläche", border_width=1, corner_radius=4)
+            total_area.place(x=220, y=380)
+            ctk.CTkLabel(self.addframe, text="Maklerprovision in %:", font=("Cairo", 14, "bold"), corner_radius=4).place(x=20, y=420)
+            commission = ctk.CTkEntry(self.addframe, width=100, height=30, placeholder_text="Prozent", border_width=1, corner_radius=4)
+            commission.place(x=220, y=420)
+
+            description = ctk.CTkTextbox(self.addframe, width=500, height=200, corner_radius=4)
+            description.insert("0.0", "Beschreibung (optional)")
+            description.place(x=350, y=260)
+
+            save_button = ctk.CTkButton(self.addframe, text="Speichern", fg_color='#d6d6d6', text_color='#000000', width=140, height=40, font=("Cairo", 14), corner_radius=4, border_color="000000")
+            save_button.place(x=800, y=20)
+            cancel_button = ctk.CTkButton(self.addframe, text="Abbrechen", fg_color='#fca1a0', text_color='#000000', width=140, height=40, font=("Cairo", 14), command=self.vanish_editor, corner_radius=4, border_color="000000")
+            cancel_button.place(x=800, y=70)
+
+
+    def vanish_editor(self):
+        if self.addframe and self.addframe.winfo_exists():
+            self.addframe.destroy()
+
+    def save_changes(self):
+        self.addframe.pack_forget()
 
 Programm(1200, 700)
