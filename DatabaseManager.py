@@ -15,13 +15,15 @@ class DatabaseManager:
 
     # insert data into table
     def insert(self, Hausname=None, Bild=None, PreisAn=None, PreisVer=None, Provision=None, Raumanzahl=None,
-           Wohnflaeche=None, Grundstuecksflaeche=None):
+           Wohnflaeche=None, Grundstuecksflaeche=None, Beschreibung=None):
         data = self.sanitize_input(Hausname=Hausname, Bild=Bild, PreisAn=PreisAn, PreisVer=PreisVer,
                                       Provision=Provision, Raumanzahl=Raumanzahl,
-                                      Wohnflaeche=Wohnflaeche, Grundstuecksflaeche=Grundstuecksflaeche)
+                                      Wohnflaeche=Wohnflaeche, Grundstuecksflaeche=Grundstuecksflaeche, Beschreibung=Beschreibung)
 
         if not data:
-            raise ValueError("No valid data to update!")
+            raise ValueError("No valid data to insert!")
+        elif not isinstance(data, list):
+            raise ValueError("SQL Injection deKtected!")
 
         attributes = []
         for key in data.keys():
@@ -33,6 +35,7 @@ class DatabaseManager:
         table = "Haus(HausName, HausID, Bild, Ankaufspreis, Verkaufspreis, Marklerprovision, Raumanzahl, Wohnflaeche, Grundstuecksflaeche)"
         command = f"INSERT INTO {table} VALUES {", ".join(attributes)}"
         self.cursor.execute(command, tuple(data.values()))
+        self.connection.commit()
 
     # read SPECIFIC data from table
     def read_all(self):
@@ -43,16 +46,18 @@ class DatabaseManager:
 
     # CHANGE data in table
     def change(self, house_id, Hausname=None, Bild=None, PreisAn=None, PreisVer=None, Provision=None, Raumanzahl=None,
-           Wohnflaeche=None, Grundstuecksflaeche=None):
+           Wohnflaeche=None, Grundstuecksflaeche=None, Beschreibung=None):
 
         """Ändert angegebene Daten in der Datenbank."""
 
         updates = self.sanitize_input(Hausname=Hausname, Bild=Bild, PreisAn=PreisAn, PreisVer=PreisVer,
         Provision=Provision, Raumanzahl=Raumanzahl,
-        Wohnflaeche=Wohnflaeche, Grundstuecksflaeche=Grundstuecksflaeche)
+        Wohnflaeche=Wohnflaeche, Grundstuecksflaeche=Grundstuecksflaeche, Beschreibung=Beschreibung)
 
         if not updates:
             raise ValueError("Invalid input detected!")
+        elif not isinstance(updates, list):
+            raise ValueError("SQL Injection detected!")
 
         attributes = []
         for key in updates.keys():
@@ -62,6 +67,7 @@ class DatabaseManager:
                 attributes.append(f"{key} = %f")
         command = f"UPDATE Haus SET {", ".join(attributes)} WHERE HausID = {house_id}"
         self.cursor.execute(command, tuple(updates.values()))
+        self.connection.commit()
 
 
 
@@ -73,9 +79,15 @@ class DatabaseManager:
         clean_data = {}
         illegal_words = ("Select", "Drop", "Insert", "Delete", "Update")
         for key, value in kwargs.items():
-            for i in illegal_words:
-                if i.lower() in value.lower:
-                    string = f"WARNING: Potential SQL injection detected in '{key}': '{value}'!"
-                    return string
-            clean_data[key] = value
+            if isinstance(value, str):
+                for i in illegal_words:
+                    print(type(i), type(value))
+                    j = str(i.lower())
+                    v = str(value.lower)
+                    if j in v:
+                        string = f"WARNING: Potential SQL injection detected in '{key}': '{value}'!"
+                        return string
+                clean_data[key] = value
+            else:
+                continue
         return clean_data

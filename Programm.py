@@ -3,6 +3,7 @@ import re
 from PIL import Image
 from CTkMessagebox import CTkMessagebox
 import customtkinter as ctk
+from customtkinter import filedialog
 from DatabaseManager import *
 
 
@@ -52,6 +53,7 @@ class Programm(ctk.CTk):
                                        corner_radius=4)
         self.commission = ctk.CTkEntry(self.addframe, width=100, height=30, placeholder_text="Prozent", border_width=1,
                                        corner_radius=4)
+        self.description = ctk.CTkTextbox(self.addframe, width=500, height=200, corner_radius=4)
         # Values for insertion
         self.name = None
         self.bprice = None
@@ -64,6 +66,11 @@ class Programm(ctk.CTk):
         self.desc = None
 
 
+
+
+        # =============================================================================================================
+        # Add and format card for each entry in table
+        # =============================================================================================================
 
         data = self.dbman.read_all()
         for row in data:
@@ -104,6 +111,9 @@ class Programm(ctk.CTk):
 
         self.mainloop()
 
+
+
+
     def on_plusbutton_click(self):
         if self.addframe and self.addframe.winfo_exists():
             if not self.addframe.winfo_ismapped():
@@ -112,7 +122,7 @@ class Programm(ctk.CTk):
                 image_placeholder = ctk.CTkFrame(self.addframe, width=300, height=210, fg_color="#e0e0e0", corner_radius=4)
                 image_placeholder.place(x=20, y=20)
                 import_button = ctk.CTkButton(self.addframe, text="Importieren (JPG)", width=200, height=30,
-                                              fg_color="#d6d6d6", text_color="#000000", corner_radius=4)
+                                              fg_color="#d6d6d6", text_color="#000000", corner_radius=4, command=self.on_importbutton_click)
                 import_button.place(x=65, y=240)
 
                 # Labels for Pricing
@@ -127,8 +137,8 @@ class Programm(ctk.CTk):
                              corner_radius=4).place(x=20, y=420)
 
 
-                description = ctk.CTkTextbox(self.addframe, width=500, height=200, corner_radius=4)
-                description.insert("0.0", "Beschreibung (optional)")
+
+                self.description.insert("0.0", "Beschreibung (optional)")
 
 
                 save_button = ctk.CTkButton(self.addframe, text="Speichern", fg_color='#d6d6d6', text_color='#000000',
@@ -145,7 +155,7 @@ class Programm(ctk.CTk):
                 self.area.place(x=220, y=340)
                 self.total_area.place(x=220, y=380)
                 self.commission.place(x=220, y=420)
-                description.place(x=350, y=260)
+                self.description.place(x=350, y=260)
                 save_button.place(x=800, y=20)
                 cancel_button.place(x=800, y=70)
         else:
@@ -153,11 +163,17 @@ class Programm(ctk.CTk):
                                             width=self.width * 0.06, height=self.height * 0.07, font=("Cairo", 30),
                                             command=self.on_plusbutton_click)
 
+
+
     def vanish_editor(self):
         if self.addframe and self.addframe.winfo_exists():
             self.addframe.place_forget()
 
+
+
     def save_changes(self):
+        """Konvertiert Kommas in Punkte, damit Floats richtig eingetrage werden können,
+        überprüft die Einträge auf Sonderzeichen und gibt Daten durch, wenn sie passen."""
         self.name = self.name_entry.get()
         self.bprice = str(self.purchase_price.get()).strip(" .").replace(",", ".")
         self.sprice = str(self.sell_price.get()).strip(" .").replace(",", ".")
@@ -165,12 +181,12 @@ class Programm(ctk.CTk):
         self.larea = str(self.area.get()).strip(" .").replace(",", ".")
         self.garea = str(self.total_area.get()).strip(" .").replace(",", ".")
         self.provision = str(self.commission.get()).strip(" .").replace(",", ".")
+        self.desc = self.description.get("1.0", 'end-1c')
         string_check = re.compile('[@_!#$%^&*()<>?/|}{~:]')
         m = ""
         flts = [self.rooms, self.larea, self.garea, self.bprice, self.sprice, self.provision]
-        print(flts)
         for f in flts:
-            if string_check.search(f) is None:
+            if string_check.search(str(f)) is None:
                 flts[0] = float(self.rooms)
                 flts[1] = float(self.larea)
                 flts[2] = float(self.garea)
@@ -192,5 +208,22 @@ class Programm(ctk.CTk):
             self.addframe.place_forget()
 
 
+
+    def on_importbutton_click(self):
+        file = filedialog.askopenfile(initialdir="C:/Users/ndyck/Downloads", title="Bild auswählen", filetypes=(("JPG","*.jpg"),("JPEG", "*.jpeg")))
+        if file:
+            pil_img = Image.open(file.name)
+            pil_img = pil_img.resize((300, 210))
+            img = ctk.CTkImage(pil_img, size=(300, 210))
+
+            # display image
+            img_label = ctk.CTkLabel(self.addframe, image=img, text="")
+            img_label.img = img
+            img_label.place(x=20, y=20)
+
+            # store image
+            img_bytes = io.BytesIO()
+            pil_img.save(img_bytes, format="JPEG")
+            self.ins_image = img_bytes.getvalue()
 
 Programm(1200, 700)
