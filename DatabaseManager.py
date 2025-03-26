@@ -22,18 +22,23 @@ class DatabaseManager:
 
         if not data:
             raise ValueError("No valid data to insert!")
-        elif not isinstance(data, list):
-            raise ValueError("SQL Injection deKtected!")
-# hallo
+        elif isinstance(data, str):
+            raise ValueError("SQL Injection detected!")
+        if 'Bild' not in data or data['Bild'] is None:
+            data['Bild'] = None
+
         attributes = []
         for key in data.keys():
-            if key == "Hausname" or key == "Bild":                                                    # gibt kein %BLOB
+            if key == Beschreibung and data[key] is None:
+                data[key] = ""
+            if key == "Hausname" or key == "Bild" or key == "Beschreibung":                                  # !! LONG BLOB and don't forget the desc!!
                 attributes.append(f"{key} = %s")
             else:
                 attributes.append(f"{key} = %f")
 
-        table = "Haus(HausName, HausID, Bild, Ankaufspreis, Verkaufspreis, Marklerprovision, Raumanzahl, Wohnflaeche, Grundstuecksflaeche)"
-        command = f"INSERT INTO {table} VALUES {", ".join(attributes)}"
+        table = "Haus"
+        columns= "(HausName, Bild, Ankaufspreis, Verkaufspreis, Maklerprovision, Raumanzahl, Wohnflaeche, Grundstuecksflaeche, Beschreibung)"
+        command = f"INSERT INTO {table} {columns} VALUES ({', '.join(['%s'] * len(data))})"
         self.cursor.execute(command, tuple(data.values()))
         self.connection.commit()
 
@@ -61,7 +66,9 @@ class DatabaseManager:
 
         attributes = []
         for key in updates.keys():
-            if key == "Hausname" or key == "Bild":                                  # !! LONG BLOB!!
+            if key == Beschreibung and updates[key] is None:
+                updates[key] = ""
+            if key == "Hausname" or key == "Bild" or key == "Beschreibung":                                  # !! LONG BLOB!!
                 attributes.append(f"{key} = %s")
             else:
                 attributes.append(f"{key} = %f")

@@ -204,7 +204,7 @@ class Programm(ctk.CTk):
         if m != "":
             CTkMessagebox(title="Error", message=m, icon="cancel")
         else:
-            self.dbman.insert(self.name, self.ins_image, flts[3], flts[4], flts[5], flts[0], flts[1], flts[2])
+            self.dbman.insert(self.name, self.ins_image, flts[3], flts[4], flts[5], flts[0], flts[1], flts[2], self.desc)
             self.addframe.place_forget()
 
 
