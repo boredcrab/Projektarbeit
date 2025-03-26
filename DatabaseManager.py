@@ -24,7 +24,7 @@ class DatabaseManager:
             raise ValueError("No valid data to insert!")
         elif not isinstance(data, list):
             raise ValueError("SQL Injection deKtected!")
-
+# hallo
         attributes = []
         for key in data.keys():
             if key == "Hausname" or key == "Bild":                                                    # gibt kein %BLOB
