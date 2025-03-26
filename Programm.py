@@ -1,6 +1,7 @@
 import io
 import re
 from PIL import Image
+from CTkMessagebox import CTkMessagebox
 import customtkinter as ctk
 from DatabaseManager import *
 
@@ -12,16 +13,46 @@ def format_number(number):
 class Programm(ctk.CTk):
     def __init__(self, width, height):
         super().__init__()
-        # Parameters
+
+
+        # =============================================================================================================
+        # App Parameters
+        # =============================================================================================================
         self.dbman = DatabaseManager()
         self.width = width
         self.height = height
         ctk.set_appearance_mode("light")
         self.title("Inventar-Editor")
         self.geometry(f"{self.width}x{self.height}")
+        self.minsize(1200, 700)
+        self.maxsize(1200, 700)
+        self.add_button = ctk.CTkButton(self, text="+", fg_color='#d6d6d6', text_color='#000000',
+                                        width=self.width * 0.06, height=self.height * 0.07, font=("Cairo", 30), command=self.on_plusbutton_click)
+        self.add_button.place(x=self.width * 0.91, y=self.height * 0.8929)
+        self.scrollable_frame = ctk.CTkScrollableFrame(self, width=self.width * 0.83, height=self.height * 0.68, fg_color="transparent")
+        self.scrollable_frame.place(x=self.width * 0.11, y=self.height * 0.14)
 
+
+
+        # =============================================================================================================
+        # All entry widgets for the editor frame
+        # =============================================================================================================
+        self.addframe = ctk.CTkFrame(self, width=self.width * 0.80, height=self.height * 0.7,
+                                     fg_color="#ffffff", border_color="#1E90FF", border_width=1, corner_radius=4)
+        self.purchase_price = ctk.CTkEntry(self.addframe, width=150, height=30, placeholder_text="Preis", border_width=1, corner_radius=4)
+        self.name_entry = ctk.CTkEntry(self.addframe, width=340, height=50, placeholder_text="Immobilienname",
+                                       corner_radius=4, border_width=1)
+        self.sell_price = ctk.CTkEntry(self.addframe, width=150, height=30, placeholder_text="Preis", border_width=1,
+                                       corner_radius=4)
+        self.room_count = ctk.CTkEntry(self.addframe, width=100, height=30, placeholder_text="Anzahl", border_width=1,
+                                       corner_radius=4)
+        self.area = ctk.CTkEntry(self.addframe, width=100, height=30, placeholder_text="Fläche", border_width=1,
+                                 corner_radius=4)
+        self.total_area = ctk.CTkEntry(self.addframe, width=100, height=30, placeholder_text="Fläche", border_width=1,
+                                       corner_radius=4)
+        self.commission = ctk.CTkEntry(self.addframe, width=100, height=30, placeholder_text="Prozent", border_width=1,
+                                       corner_radius=4)
         # Values for insertion
-        self.addframe = None
         self.name = None
         self.bprice = None
         self.sprice = None
@@ -31,16 +62,9 @@ class Programm(ctk.CTk):
         self.garea = None
         self.provision = None
         self.desc = None
-        self.floatvalues = [self.bprice, self.sprice, self.provision]
-        self.intvalues = [self.rooms, self.larea, self.garea]
 
-        self.minsize(1200, 700)
-        self.maxsize(1200, 700)
-        self.add_button = ctk.CTkButton(self, text="+", fg_color='#d6d6d6', text_color='#000000',
-                                        width=self.width * 0.06, height=self.height * 0.07, font=("Cairo", 30), command=self.on_plusbutton_click)
-        self.add_button.place(x=self.width * 0.91, y=self.height * 0.8929)
-        self.scrollable_frame = ctk.CTkScrollableFrame(self, width=self.width * 0.83, height=self.height * 0.68, fg_color="transparent")
-        self.scrollable_frame.place(x=self.width * 0.11, y=self.height * 0.14)
+
+
         data = self.dbman.read_all()
         for row in data:
             # For each subframe/card
@@ -81,81 +105,92 @@ class Programm(ctk.CTk):
         self.mainloop()
 
     def on_plusbutton_click(self):
-        if self.addframe is None or not self.addframe.winfo_exists():
-            self.addframe = ctk.CTkFrame(self, width=self.width * 0.80, height=self.height * 0.7,
-                                         fg_color="#ffffff", border_color="#1E90FF", border_width=1, corner_radius=4)
-            self.addframe.place(x=self.width * 0.13, y=self.height * 0.14)
+        if self.addframe and self.addframe.winfo_exists():
+            if not self.addframe.winfo_ismapped():
+                self.addframe.place(x=self.width * 0.13, y=self.height * 0.14)
 
-            image_placeholder = ctk.CTkFrame(self.addframe, width=300, height=210, fg_color="#e0e0e0", corner_radius=4)
-            image_placeholder.place(x=20, y=20)
-            import_button = ctk.CTkButton(self.addframe, text="Importieren (JPG)", width=200, height=30,
-                                          fg_color="#d6d6d6", text_color="#000000", corner_radius=4)
-            import_button.place(x=65, y=240)
-            # Property Name Input
-            name_entry = ctk.CTkEntry(self.addframe, width=320, height=50, placeholder_text="Immobilienname", corner_radius=4, border_width=1)
-            self.name = name_entry.get()
-            name_entry.place(x=350, y=30)
+                image_placeholder = ctk.CTkFrame(self.addframe, width=300, height=210, fg_color="#e0e0e0", corner_radius=4)
+                image_placeholder.place(x=20, y=20)
+                import_button = ctk.CTkButton(self.addframe, text="Importieren (JPG)", width=200, height=30,
+                                              fg_color="#d6d6d6", text_color="#000000", corner_radius=4)
+                import_button.place(x=65, y=240)
 
-            # Price Inputs
-            ctk.CTkLabel(self.addframe, text="Ankaufspreis:", font=("Cairo", 14), corner_radius=4).place(x=350, y=120)
-            purchase_price = ctk.CTkEntry(self.addframe, width=150, height=30, placeholder_text="Preis", border_width=1, corner_radius=4)
-            self.bprice = purchase_price.get()
-            purchase_price.place(x=450, y=120)
-            ctk.CTkLabel(self.addframe, text="€", font=("Cairo", 16), corner_radius=4).place(x=600, y=120)
-            ctk.CTkLabel(self.addframe, text="Verkaufspreis:", font=("Cairo", 14), corner_radius=4).place(x=350, y=160)
-            sell_price = ctk.CTkEntry(self.addframe, width=150, height=30, placeholder_text="Preis", border_width=1, corner_radius=4)
-            self.sprice = sell_price.get()
-            sell_price.place(x=450, y=160)
-            ctk.CTkLabel(self.addframe, text="€", font=("Cairo", 16), corner_radius=4).place(x=600, y=160)
+                # Labels for Pricing
+                ctk.CTkLabel(self.addframe, text="Ankaufspreis:", font=("Cairo", 14), corner_radius=4).place(x=350, y=120)
+                ctk.CTkLabel(self.addframe, text="€", font=("Cairo", 16), corner_radius=4).place(x=600, y=120)
+                ctk.CTkLabel(self.addframe, text="Verkaufspreis:", font=("Cairo", 14), corner_radius=4).place(x=350, y=160)
+                ctk.CTkLabel(self.addframe, text="€", font=("Cairo", 16), corner_radius=4).place(x=600, y=160)
+                ctk.CTkLabel(self.addframe, text="Anzahl Zimmer:", font=("Cairo", 14, "bold"), corner_radius=4).place(x=20, y=300)
+                ctk.CTkLabel(self.addframe, text="Wohnfläche in m²:", font=("Cairo", 14, "bold"), corner_radius=4).place(x=20, y=340)
+                ctk.CTkLabel(self.addframe, text="Grundstücksfläche in m²:", font=("Cairo", 14, "bold"), corner_radius=4).place(x=20, y=380)
+                ctk.CTkLabel(self.addframe, text="Maklerprovision in %:", font=("Cairo", 14, "bold"),
+                             corner_radius=4).place(x=20, y=420)
 
-            ctk.CTkLabel(self.addframe, text="Anzahl Zimmer:", font=("Cairo", 14, "bold"), corner_radius=4).place(x=20, y=300)
-            room_count = ctk.CTkEntry(self.addframe, width=100, height=30, placeholder_text="Anzahl", border_width=1, corner_radius=4)
-            self.rooms = room_count.get()
-            room_count.place(x=220, y=300)
-            ctk.CTkLabel(self.addframe, text="Wohnfläche in m²:", font=("Cairo", 14, "bold"), corner_radius=4).place(x=20, y=340)
-            area = ctk.CTkEntry(self.addframe, width=100, height=30, placeholder_text="Fläche", border_width=1, corner_radius=4)
-            self.larea = area.get()
-            area.place(x=220, y=340)
-            ctk.CTkLabel(self.addframe, text="Grundstücksfläche in m²:", font=("Cairo", 14, "bold"), corner_radius=4).place(x=20, y=380)
-            total_area = ctk.CTkEntry(self.addframe, width=100, height=30, placeholder_text="Fläche", border_width=1, corner_radius=4)
-            self.garea = area.get()
-            total_area.place(x=220, y=380)
-            ctk.CTkLabel(self.addframe, text="Maklerprovision in %:", font=("Cairo", 14, "bold"), corner_radius=4).place(x=20, y=420)
-            commission = ctk.CTkEntry(self.addframe, width=100, height=30, placeholder_text="Prozent", border_width=1, corner_radius=4)
-            self.provision = commission.get()
-            commission.place(x=220, y=420)
 
-            description = ctk.CTkTextbox(self.addframe, width=500, height=200, corner_radius=4)
-            description.insert("0.0", "Beschreibung (optional)")
-            description.place(x=350, y=260)
+                description = ctk.CTkTextbox(self.addframe, width=500, height=200, corner_radius=4)
+                description.insert("0.0", "Beschreibung (optional)")
 
-            save_button = ctk.CTkButton(self.addframe, text="Speichern", fg_color='#d6d6d6', text_color='#000000', width=140, height=40, font=("Cairo", 14), corner_radius=4, border_color="000000")
-            save_button.place(x=800, y=20)
-            cancel_button = ctk.CTkButton(self.addframe, text="Abbrechen", fg_color='#fca1a0', text_color='#000000', width=140, height=40, font=("Cairo", 14), command=self.vanish_editor, corner_radius=4, border_color="000000")
-            cancel_button.place(x=800, y=70)
 
+                save_button = ctk.CTkButton(self.addframe, text="Speichern", fg_color='#d6d6d6', text_color='#000000',
+                                            width=140, height=40, font=("Cairo", 14), corner_radius=4,
+                                            border_color="000000", command=self.save_changes)
+
+                cancel_button = ctk.CTkButton(self.addframe, text="Abbrechen", fg_color='#fca1a0', text_color='#000000',
+                                              width=140, height=40, font=("Cairo", 14), command=self.vanish_editor,
+                                              corner_radius=4, border_color="000000")
+                self.name_entry.place(x=350, y=40)
+                self.purchase_price.place(x=450, y=120)
+                self.sell_price.place(x=450, y=160)
+                self.room_count.place(x=220, y=300)
+                self.area.place(x=220, y=340)
+                self.total_area.place(x=220, y=380)
+                self.commission.place(x=220, y=420)
+                description.place(x=350, y=260)
+                save_button.place(x=800, y=20)
+                cancel_button.place(x=800, y=70)
+        else:
+            self.add_button = ctk.CTkButton(self, text="+", fg_color='#d6d6d6', text_color='#000000',
+                                            width=self.width * 0.06, height=self.height * 0.07, font=("Cairo", 30),
+                                            command=self.on_plusbutton_click)
 
     def vanish_editor(self):
         if self.addframe and self.addframe.winfo_exists():
-            self.addframe.destroy()
+            self.addframe.place_forget()
 
     def save_changes(self):
-        self.prepare_data()
-        for i, j in self.intvalues, self.floatvalues:
-            if isinstance(i, int) and isinstance(j, float):
+        self.name = self.name_entry.get()
+        self.bprice = str(self.purchase_price.get()).strip(" .").replace(",", ".")
+        self.sprice = str(self.sell_price.get()).strip(" .").replace(",", ".")
+        self.rooms = str(self.room_count.get()).strip(" .").replace(",", ".")
+        self.larea = str(self.area.get()).strip(" .").replace(",", ".")
+        self.garea = str(self.total_area.get()).strip(" .").replace(",", ".")
+        self.provision = str(self.commission.get()).strip(" .").replace(",", ".")
+        string_check = re.compile('[@_!#$%^&*()<>?/|}{~:]')
+        m = ""
+        flts = [self.rooms, self.larea, self.garea, self.bprice, self.sprice, self.provision]
+        print(flts)
+        for f in flts:
+            if string_check.search(f) is None:
+                flts[0] = float(self.rooms)
+                flts[1] = float(self.larea)
+                flts[2] = float(self.garea)
+                flts[3] = float(self.bprice)
+                flts[4] = float(self.sprice)
+                flts[5] = float(self.provision)
                 continue
-            elif not (isinstance(i, int) and isinstance(j, float)):
-                return f"Bitte {i} als Ganzzahl und {j} als Zahl angeben! Sonderzeichen werden nicht angenommen."
-            elif not isinstance(i, int):
-                return f"Bitte {i} als Ganzzahl angeben! Sonderzeichen werden nicht angenommen."
-            elif not isinstance(j, float):
-                return f"Bitte {j} als Zahl angeben! Sonderzeichen werden nicht angenommen."
-        self.dbman.insert(self.name, self.ins_image, self.bprice, self.sprice, self.provision, self.rooms, self.larea, self.garea)
-        self.addframe.pack_forget()
+            elif f is None:
+                mes = "Einige Attribute sind nicht ausgefüllt. Bitte geben Sie alles an."
+                if not mes in m:
+                    m += ("\n" + mes)
+            else:
+                mes = f"Bitte {f} als Ganzzahl angeben! Sonderzeichen werden nicht angenommen."
+                m += ("\n" + mes)
+        if m != "":
+            CTkMessagebox(title="Error", message=m, icon="cancel")
+        else:
+            self.dbman.insert(self.name, self.ins_image, flts[3], flts[4], flts[5], flts[0], flts[1], flts[2])
+            self.addframe.place_forget()
 
-    def prepare_data(self):
-        self.bprice = str(self.bprice).strip(" .").replace(",", ".")
-        self.sprice = str(self.sprice).strip(" .").replace(",", ".")
-        self.provision = str(self.provision).replace(",", ".")
+
 
 Programm(1200, 700)
