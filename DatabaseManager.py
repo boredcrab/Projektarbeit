@@ -25,21 +25,27 @@ class DatabaseManager:
         elif isinstance(data, str):
             raise ValueError("SQL Injection detected!")
         if 'Bild' not in data or data['Bild'] is None:
-            data['Bild'] = None
+            data['Bild'] = ""
+
+        print(data.values())
 
         attributes = []
-        for key in data.keys():
-            if key == Beschreibung and data[key] is None:
+        for key in data:
+            if key == Beschreibung and data[key]=="Beschreibung (optional)":
                 data[key] = ""
-            if key == "Hausname" or key == "Bild" or key == "Beschreibung":                                  # !! LONG BLOB and don't forget the desc!!
-                attributes.append(f"{key} = %s")
+            if key == "Hausname" or key == "Beschreibung":                                  # !! LONG BLOB and don't forget the desc!!
+                attributes.append(str(data[key]))
+            elif key == "Bild":
+                attributes.append(data[key])
             else:
-                attributes.append(f"{key} = %f")
+                attributes.append(data[key])
 
         table = "Haus"
         columns= "(HausName, Bild, Ankaufspreis, Verkaufspreis, Maklerprovision, Raumanzahl, Wohnflaeche, Grundstuecksflaeche, Beschreibung)"
-        command = f"INSERT INTO {table} {columns} VALUES ({', '.join(['%s'] * len(data))})"
-        self.cursor.execute(command, tuple(data.values()))
+        command = f"INSERT INTO {table} {columns} VALUES (%s, %s, %f, %f, %f, %f, %f, %f, %f)"
+        print(attributes)
+        print(command)
+        self.cursor.execute(command, attributes)
         self.connection.commit()
 
     # read SPECIFIC data from table
@@ -88,7 +94,6 @@ class DatabaseManager:
         for key, value in kwargs.items():
             if isinstance(value, str):
                 for i in illegal_words:
-                    print(type(i), type(value))
                     j = str(i.lower())
                     v = str(value.lower)
                     if j in v:
