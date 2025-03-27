@@ -1,5 +1,6 @@
 import io
 import re
+import time
 from PIL import Image
 from CTkMessagebox import CTkMessagebox
 import customtkinter as ctk
@@ -65,49 +66,7 @@ class Programm(ctk.CTk):
         self.provision = None
         self.desc = None
 
-
-
-
-        # =============================================================================================================
-        # Add and format card for each entry in table
-        # =============================================================================================================
-
-        data = self.dbman.read_all()
-        for row in data:
-            # For each subframe/card
-            card = ctk.CTkFrame(self.scrollable_frame, width=900, height=150, fg_color="#ffffff", corner_radius=5)
-            card.pack(pady=10, fill="x")
-
-            # Left Section
-            left_section = ctk.CTkFrame(card, fg_color="transparent")
-            left_section.grid(row=0, column=0, sticky="nw", padx=10, pady=10)
-            img_data = row[1]
-            img_stream = io.BytesIO(img_data)
-            pil_img = Image.open(img_stream)
-            img = ctk.CTkImage(pil_img, size=(300, 210))  # Bigger image now
-            ctk.CTkLabel(left_section, image=img, text="").grid(row=0, column=0, rowspan=2, padx=(0, 15), sticky="n")
-            info_block = ctk.CTkFrame(left_section, fg_color="transparent")
-            info_block.grid(row=0, column=1, sticky="w")
-            ctk.CTkLabel(info_block, text=row[0], font=("Cairo", 20, "bold")).grid(row=0, column=0, sticky="w")
-            ctk.CTkLabel(card, text=f"Maklerprovision: {format_number(str(row[4]).replace(".", ","))} %", font=("Cairo", 16, "bold")).grid(row=0, column=0, columnspan=2, sticky="ne", pady=50, padx=20)
-            ctk.CTkLabel(info_block, text=f"{row[5]} Zimmer", font=("Cairo", 14)).grid(row=0, column=1, padx=(10, 0))
-            ctk.CTkLabel(info_block, text=f"{row[6]} m²", font=("Cairo", 14)).grid(row=0, column=2, padx=(10, 0))
-            ctk.CTkLabel(info_block, text=f"{row[7]} m² ges.", font=("Cairo", 14, "bold")).grid(row=1, column=0, sticky="w", pady=(5, 0))
-
-            right_section = ctk.CTkFrame(card, fg_color="transparent")
-            right_section.grid(row=0, column=1, sticky="se", padx=10, pady=10)
-            ctk.CTkLabel(right_section,
-                         text=f"Ankaufspreis:\n{format_number(str(row[2]).replace(".", ","))} €",
-                         font=("Cairo", 14)
-                         ).grid(row=1, column=0, sticky="e", pady=(5, 0))
-            ctk.CTkLabel(
-                right_section,
-                text=f"Verkaufspreis:\n{format_number(str(row[3]).replace(".", ","))} €",
-                font=("Cairo", 14)
-            ).grid(row=1, column=1, sticky="e", pady=(5, 0), padx=(15, 0))
-
-            card.grid_columnconfigure(0, weight=1)
-            card.grid_columnconfigure(1, weight=0)
+        self.update_inventory()
 
         self.mainloop()
 
@@ -225,5 +184,55 @@ class Programm(ctk.CTk):
             img_bytes = io.BytesIO()
             pil_img.save(img_bytes, format="JPEG")
             self.ins_image = img_bytes.getvalue()
+
+
+
+
+
+    # =============================================================================================================
+    # Update and format card for each entry in table, delete previous entries
+    # =============================================================================================================
+
+    def update_inventory(self):
+        for widget in self.scrollable_frame.winfo_children():               # clears all widgets inside scrollable frame; no layering
+            widget.destroy()
+
+        data = self.dbman.read_all()
+        for row in data:
+            # For each subframe/card
+            card = ctk.CTkFrame(self.scrollable_frame, width=900, height=150, fg_color="#ffffff", corner_radius=5)
+            card.pack(pady=10, fill="x")
+
+            # Left Section
+            left_section = ctk.CTkFrame(card, fg_color="transparent")
+            left_section.grid(row=0, column=0, sticky="nw", padx=10, pady=10)
+            img_data = row[1]
+            img_stream = io.BytesIO(img_data)
+            pil_img = Image.open(img_stream)
+            img = ctk.CTkImage(pil_img, size=(300, 210))  # Bigger image now
+            ctk.CTkLabel(left_section, image=img, text="").grid(row=0, column=0, rowspan=2, padx=(0, 15), sticky="n")
+            info_block = ctk.CTkFrame(left_section, fg_color="transparent")
+            info_block.grid(row=0, column=1, sticky="w")
+            ctk.CTkLabel(info_block, text=row[0], font=("Cairo", 20, "bold")).grid(row=0, column=0, sticky="w")
+            ctk.CTkLabel(card, text=f"Maklerprovision: {format_number(str(row[4]).replace(".", ","))} %", font=("Cairo", 16, "bold")).grid(row=0, column=0, columnspan=2, sticky="ne", pady=50, padx=20)
+            ctk.CTkLabel(info_block, text=f"{row[5]} Zimmer", font=("Cairo", 14)).grid(row=0, column=1, padx=(10, 0))
+            ctk.CTkLabel(info_block, text=f"{row[6]} m²", font=("Cairo", 14)).grid(row=0, column=2, padx=(10, 0))
+            ctk.CTkLabel(info_block, text=f"{row[7]} m² ges.", font=("Cairo", 14, "bold")).grid(row=1, column=0, sticky="w", pady=(5, 0))
+
+            right_section = ctk.CTkFrame(card, fg_color="transparent")
+            right_section.grid(row=0, column=1, sticky="se", padx=10, pady=10)
+            ctk.CTkLabel(right_section,
+                         text=f"Ankaufspreis:\n{format_number(str(row[2]).replace(".", ","))} €",
+                         font=("Cairo", 14)
+                         ).grid(row=1, column=0, sticky="e", pady=(5, 0))
+            ctk.CTkLabel(
+                right_section,
+                text=f"Verkaufspreis:\n{format_number(str(row[3]).replace(".", ","))} €",
+                font=("Cairo", 14)
+            ).grid(row=1, column=1, sticky="e", pady=(5, 0), padx=(15, 0))
+
+            card.grid_columnconfigure(0, weight=1)
+            card.grid_columnconfigure(1, weight=0)
+
 
 Programm(1200, 700)
