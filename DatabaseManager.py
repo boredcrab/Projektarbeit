@@ -20,26 +20,24 @@ class DatabaseManager:
                                       Provision=Provision, Raumanzahl=Raumanzahl,
                                       Wohnflaeche=Wohnflaeche, Grundstuecksflaeche=Grundstuecksflaeche, Beschreibung=Beschreibung)
 
+        print(data)
         if not data:
             raise ValueError("No valid data to insert!")
         elif isinstance(data, str):
             raise ValueError("SQL Injection detected!")
-        if 'Bild' not in data or data['Bild'] is None:
-            data['Bild'] = ""
+        if data[1] is None:
+            data[1] = ""
 
-        print(data.values())
 
         attributes = []
-        for key in data:
-            if key == Beschreibung and data[key]=="Beschreibung (optional)":
-                data[key] = ""
-            if key == "Hausname" or key == "Beschreibung":                                  # !! LONG BLOB and don't forget the desc!!
-                attributes.append(str(data[key]))
-            elif key == "Bild":
-                attributes.append(data[key])
+        for value in data:
+            i = data.index(value)
+            if data[i] =="Beschreibung (optional)":
+                data[i] = ""
+            if value == data[0] or value == data[8]:                                  # !! LONG BLOB and don't forget the desc!!
+                attributes.append(str(value))
             else:
-                attributes.append(data[key])
-
+                attributes.append(value)
         table = "Haus"
         columns= "(HausName, Bild, Ankaufspreis, Verkaufspreis, Maklerprovision, Raumanzahl, Wohnflaeche, Grundstuecksflaeche, Beschreibung)"
         command = f"INSERT INTO {table} {columns} VALUES (%s, %s, %f, %f, %f, %f, %f, %f, %f)"
@@ -89,7 +87,7 @@ class DatabaseManager:
     def sanitize_input(self, **kwargs):
         """Prüft auf SQL-Injection. Wenn beim return ein String rauskommt, wurde eine SQL-Injection erkannt und
         die Funktion darf nicht weiterverwendet werden."""
-        clean_data = {}
+        clean_data = []
         illegal_words = ("Select", "Drop", "Insert", "Delete", "Update")
         for key, value in kwargs.items():
             if isinstance(value, str):
@@ -99,7 +97,8 @@ class DatabaseManager:
                     if j in v:
                         string = f"WARNING: Potential SQL injection detected in '{key}': '{value}'!"
                         return string
-                clean_data[key] = value
+                clean_data.append(value)
             else:
+                clean_data.append(value)
                 continue
         return clean_data
