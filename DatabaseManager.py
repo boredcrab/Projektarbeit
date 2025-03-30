@@ -32,17 +32,17 @@ class DatabaseManager:
         attributes = []
         for value in data:
             i = data.index(value)
-            if data[i] =="Beschreibung (optional)":
-                data[i] = ""
+            if data[i] =='Beschreibung (optional)':
+                data[i] = " "
             if value == data[0] or value == data[8]:                                  # !! LONG BLOB and don't forget the desc!!
                 attributes.append(str(value))
             else:
                 attributes.append(value)
         table = "Haus"
         columns= "(HausName, Bild, Ankaufspreis, Verkaufspreis, Maklerprovision, Raumanzahl, Wohnflaeche, Grundstuecksflaeche, Beschreibung)"
-        command = f"INSERT INTO {table} {columns} VALUES (%s, %s, %f, %f, %f, %f, %f, %f, %f)"
+        command = f"INSERT INTO {table} {columns} VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
         print(attributes)
-        print(command)
+        print(columns)
         self.cursor.execute(command, attributes)
         self.connection.commit()
 
