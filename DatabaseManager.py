@@ -13,6 +13,10 @@ class DatabaseManager:
     def close_connection(self):
         self.connection.close()
 
+    def delete(self, hausid):
+        self.cursor.execute(f"DELETE FROM Haus WHERE Haus_ID {hausid}")
+        self.connection.commit()
+
     # insert data into table
     def insert(self, Hausname=None, Bild=None, PreisAn=None, PreisVer=None, Provision=None, Raumanzahl=None,
            Wohnflaeche=None, Grundstuecksflaeche=None, Beschreibung=None):
@@ -53,7 +57,7 @@ class DatabaseManager:
         data = self.cursor.fetchall()
         return data
 
-    # CHANGE data in table
+    # CHANGE data in table; NOT FINISHED DUE TO TIME CONSTRAINTS, DO NOT USE!!!
     def change(self, house_id, Hausname=None, Bild=None, PreisAn=None, PreisVer=None, Provision=None, Raumanzahl=None,
            Wohnflaeche=None, Grundstuecksflaeche=None, Beschreibung=None):
 
@@ -69,15 +73,20 @@ class DatabaseManager:
             raise ValueError("SQL Injection detected!")
 
         attributes = []
-        for key in updates.keys():
-            if key == Beschreibung and updates[key] is None:
-                updates[key] = ""
-            if key == "Hausname" or key == "Bild" or key == "Beschreibung":                                  # !! LONG BLOB!!
-                attributes.append(f"{key} = %s")
+        for value in updates:
+            i = updates.index(value)
+            if updates[i] == 'Beschreibung (optional)':
+                updates[i] = " "
+            if value == updates[0] or value == updates[8]:  # !! LONG BLOB and don't forget the desc!!
+                attributes.append(str(value))
             else:
-                attributes.append(f"{key} = %f")
-        command = f"UPDATE Haus SET {", ".join(attributes)} WHERE HausID = {house_id}"
-        self.cursor.execute(command, tuple(updates.values()))
+                attributes.append(value)
+        table = "Haus"
+        columns = "(HausName, Bild, Ankaufspreis, Verkaufspreis, Maklerprovision, Raumanzahl, Wohnflaeche, Grundstuecksflaeche, Beschreibung)"
+        command = f"UPDATE {table} SET HausName=%s, Bild=%s, Ankaufspreis=%s, Verkaufspreis=%s, Maklerprovision=%s, Raumanzahl=%s, Wohnflaeche=%s, Grundstuecksflaeche=%s, Beschreibung=%s) WHERE "
+        print(attributes)
+        print(columns)
+        self.cursor.execute(command, attributes)
         self.connection.commit()
 
 

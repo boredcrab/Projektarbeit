@@ -1,6 +1,6 @@
 import io
 import re
-import time
+import tkinter as tk
 from PIL import Image
 from CTkMessagebox import CTkMessagebox
 import customtkinter as ctk
@@ -70,8 +70,22 @@ class Programm(ctk.CTk):
 
         self.mainloop()
 
+    def on_right_click(self, event, entry_id):
+        menu = tk.Menu(self.scrollable_frame, tearoff=0)
+        menu.add_command(label="Löschen", command=lambda: self.confirm_delete(entry_id))
+        menu.tk_popup(event.x_root, event.y_root)
+        print(event.x_root, event.y_root)
 
+    def confirm_delete(self, entry_id):
+        msgbox = CTkMessagebox(title="Bestätigung", message="Möchten Sie diesen Eintrag wirklich löschen?",
+                               icon="warning", option_1="Ja", option_2="Nein")
+        if msgbox.get() == "Ja":
+            self.dbman.delete(entry_id)
+            self.update_inventory()
 
+    # =============================================================================================================
+    # Open Add Editor
+    # =============================================================================================================
 
     def on_plusbutton_click(self):
         if self.addframe and self.addframe.winfo_exists():
@@ -133,38 +147,70 @@ class Programm(ctk.CTk):
     def save_changes(self):
         """Konvertiert Kommas in Punkte, damit Floats richtig eingetrage werden können,
         überprüft die Einträge auf Sonderzeichen und gibt Daten durch, wenn sie passen."""
-        self.name = self.name_entry.get()
-        self.bprice = str(self.purchase_price.get()).strip(" .").replace(",", ".")
-        self.sprice = str(self.sell_price.get()).strip(" .").replace(",", ".")
-        self.rooms = str(self.room_count.get()).strip(" .").replace(",", ".")
-        self.larea = str(self.area.get()).strip(" .").replace(",", ".")
-        self.garea = str(self.total_area.get()).strip(" .").replace(",", ".")
-        self.provision = str(self.commission.get()).strip(" .").replace(",", ".")
-        self.desc = self.description.get("1.0", 'end-1c')
-        string_check = re.compile('[@_!#$%^&*()<>?/|}{~:]')
-        m = ""
-        flts = [self.rooms, self.larea, self.garea, self.bprice, self.sprice, self.provision]
-        for f in flts:
-            if string_check.search(str(f)) is None:
-                flts[0] = float(self.rooms)
-                flts[1] = float(self.larea)
-                flts[2] = float(self.garea)
-                flts[3] = float(self.bprice)
-                flts[4] = float(self.sprice)
-                flts[5] = float(self.provision)
-                continue
-            elif f is None:
-                mes = "Einige Attribute sind nicht ausgefüllt. Bitte geben Sie alles an."
-                if not mes in m:
-                    m += ("\n" + mes)
-            else:
-                mes = f"Bitte {f} als Ganzzahl angeben! Sonderzeichen werden nicht angenommen."
-                m += ("\n" + mes)
-        if m != "":
-            CTkMessagebox(title="Error", message=m, icon="cancel")
-        else:
-            self.dbman.insert(self.name, self.ins_image, flts[3], flts[4], flts[5], flts[0], flts[1], flts[2], self.desc)
-            self.addframe.place_forget()
+        data = {
+            "Name": self.name_entry.get(),
+            "Beschreibung": self.description.get("1.0", 'end-1c'),
+            "Einkaufspreis": self.purchase_price.get(),
+            "Verkaufspreis": self.sell_price.get(),
+            "Zimmeranzahl": self.room_count.get(),
+            "Fläche": self.area.get(),
+            "Gesamtfläche": self.total_area.get(),
+            "Provision": self.commission.get(),
+                        }
+
+        error_messages = []
+        string_check = re.compile(r'[@_#$%^&*<>/|}{~="]')
+        float_check = re.compile(r'[@_#$€^°!"§%&/()=}{?`´~-]')
+
+        for field, value in data.items():
+            if not value.strip():
+                error_messages.append(f"Das Feld '{field}' darf nicht leer sein.")
+            if field in ["Name", "Beschreibung"] and string_check.search(value):
+                error_messages.append(f"Das Feld '{field}' enthält ungültige Zeichen.")
+
+        if not self.ins_image:
+            error_messages.append("Es wurde kein Bild hinzugefügt. Bitte wählen Sie ein Bild aus.")
+
+        if error_messages:
+            CTkMessagebox(title="Fehler", message="\n".join(error_messages), icon="cancel")
+            return
+
+        self.name = data["Name"]
+        self.desc = data["Beschreibung"]
+        self.bprice = data["Einkaufspreis"].strip(" .").replace(",", ".")
+        self.sprice = data["Verkaufspreis"].strip(" .").replace(",", ".")
+        self.rooms = data["Zimmeranzahl"].strip(" .").replace(",", ".")
+        self.larea = data["Fläche"].strip(" .").replace(",", ".")
+        self.garea = data["Gesamtfläche"].strip(" .").replace(",", ".")
+        self.provision = data["Provision"].strip(" .").replace(",", ".")
+
+        flts = {
+            "Zimmeranzahl": self.rooms,
+            "Fläche": self.larea,
+            "Gesamtfläche": self.garea,
+            "Einkaufspreis": self.bprice,
+            "Verkaufspreis": self.sprice,
+            "Provision": self.provision,
+        }
+
+        for field, value in flts.items():
+            if float_check.search(value):
+                error_messages.append(f"Das Feld '{field}' enthält ungültige Zeichen. Bitte nur Zahlen eingeben.")
+
+        if error_messages:
+            CTkMessagebox(title="Fehler", message="\n".join(error_messages), icon="cancel")
+            return
+
+        try:
+            flts = {key: float(value) for key, value in flts.items()}
+        except ValueError:
+            CTkMessagebox(title="Fehler", message="Bitte stellen Sie sicher, dass alle Zahlenfelder korrekt ausgefüllt sind.",
+                          icon="cancel")
+            return
+
+        self.dbman.insert(self.name, self.ins_image, flts["Einkaufspreis"], flts["Verkaufspreis"], flts["Provision"], flts["Zimmeranzahl"], flts["Fläche"], flts["Gesamtfläche"], self.desc)
+        self.addframe.place_forget()
+        self.update_inventory()
 
 
 
@@ -202,6 +248,7 @@ class Programm(ctk.CTk):
             # For each subframe/card
             card = ctk.CTkFrame(self.scrollable_frame, width=900, height=150, fg_color="#ffffff", corner_radius=5)
             card.pack(pady=10, fill="x")
+            card.bind("<ButtonRelease-3>", lambda event, entry_id=row[8]: self.on_right_click(event, entry_id))
 
             # Left Section
             left_section = ctk.CTkFrame(card, fg_color="transparent")
