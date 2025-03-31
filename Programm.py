@@ -252,6 +252,7 @@ class Programm(ctk.CTk):
 
             # Left Section
             left_section = ctk.CTkFrame(card, fg_color="transparent")
+            left_section.bind("<ButtonRelease-3>", lambda event, entry_id=row[8]: self.on_right_click(event, entry_id))
             left_section.grid(row=0, column=0, sticky="nw", padx=10, pady=10)
             img_data = row[1]
             img_stream = io.BytesIO(img_data)
@@ -259,6 +260,7 @@ class Programm(ctk.CTk):
             img = ctk.CTkImage(pil_img, size=(300, 210))  # Bigger image now
             ctk.CTkLabel(left_section, image=img, text="").grid(row=0, column=0, rowspan=2, padx=(0, 15), sticky="n")
             info_block = ctk.CTkFrame(left_section, fg_color="transparent")
+            info_block.bind("<ButtonRelease-3>", lambda event, entry_id=row[8]: self.on_right_click(event, entry_id))
             info_block.grid(row=0, column=1, sticky="w")
             ctk.CTkLabel(info_block, text=row[0], font=("Cairo", 20, "bold")).grid(row=0, column=0, sticky="w")
             ctk.CTkLabel(card, text=f"Maklerprovision: {format_number(str(row[4]).replace(".", ","))} %", font=("Cairo", 16, "bold")).grid(row=0, column=0, columnspan=2, sticky="ne", pady=50, padx=20)
@@ -267,6 +269,7 @@ class Programm(ctk.CTk):
             ctk.CTkLabel(info_block, text=f"{row[7]} m² ges.", font=("Cairo", 14, "bold")).grid(row=1, column=0, sticky="w", pady=(5, 0))
 
             right_section = ctk.CTkFrame(card, fg_color="transparent")
+            right_section.bind("<ButtonRelease-3>", lambda event, entry_id=row[8]: self.on_right_click(event, entry_id))
             right_section.grid(row=0, column=1, sticky="se", padx=10, pady=10)
             ctk.CTkLabel(right_section,
                          text=f"Ankaufspreis:\n{format_number(str(row[2]).replace(".", ","))} €",

@@ -14,7 +14,8 @@ class DatabaseManager:
         self.connection.close()
 
     def delete(self, hausid):
-        self.cursor.execute(f"DELETE FROM Haus WHERE Haus_ID {hausid}")
+        statement = f"DELETE FROM Haus WHERE HausID={hausid}"
+        self.cursor.execute(statement)
         self.connection.commit()
 
     # insert data into table
